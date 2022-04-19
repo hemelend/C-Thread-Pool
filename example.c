@@ -12,24 +12,33 @@
  * */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <stdint.h>
 #include "thpool.h"
 
-void task(void *arg){
-	printf("Thread #%u working on %d\n", (int)pthread_self(), (int) arg);
+void sleep(int);
+
+threadpool thpool_init(int t);
+
+void task(void* arg){
+	int index = *(int*) arg;
+	sleep(rand() % 5 + 1 );
+	printf("Thread #%u working on %d\n", (int)pthread_self(), index);
 }
 
 
 int main(){
 	
 	puts("Making threadpool with 4 threads");
-	threadpool thpool = thpool_init(4);
+	threadpool thpool = thpool_init(8);
 
 	puts("Adding 40 tasks to threadpool");
 	int i;
 	for (i=0; i<40; i++){
-		thpool_add_work(thpool, task, (void*)(uintptr_t)i);
+		int* index = malloc(sizeof(int64_t));
+		*index = i;
+		thpool_add_work(thpool, task, index);
 	};
 
 	thpool_wait(thpool);
